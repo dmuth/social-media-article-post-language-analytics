@@ -9,6 +9,7 @@ import sys
 import time
 import webbrowser
 
+import dateutil.parser
 import twython
 
 sys.path.append("lib")
@@ -98,17 +99,98 @@ if (not twitter_data):
 
 	data.put("twitter_data", twitter_data)
 
+
+#
+# Fetch a number of tweets from Twitter.
+#
+# @param object twitter - Our Twitter oject
+# @param integer count - How many tweets to fetch?
+# @param kwarg max_id - The maximum Id of tweets so we can go back in time
+#
+# @return A dictionary that includes tweets that aren't RTs, the count, the last ID,
+#	and how many tweets were skipped.
+#
+def getTweets(twitter, count, **kwargs):
+
+	retval = {"tweets": [], "count": 0, "skipped": 0, "last_id": -1}
+	
+	#
+	# If we have a last ID, decrement it by one and query Twitter accordingly,
+	# otherwise we start at the top of the timeline.
+	#
+	if ("last_id" in kwargs and kwargs["last_id"]):
+		max_id = kwargs["last_id"] - 1
+		tweets = twitter.get_user_timeline(
+			user_id = screen_name, exclude_replies = True, include_rts = True, 
+			count = count, max_id = max_id)
+
+	else: 
+		tweets = twitter.get_user_timeline(
+			user_id = screen_name, exclude_replies = True, include_rts = True, 
+			count = count)
+
+	last_id = None
+
+	#
+	# Now loop through our Tweets, filter out any RTs, do timestamp conversion,
+	# and store the tweet.
+	#
+	for row in tweets:
+		text = row["text"]
+		if (text[0] == "R" and text[1] == "T"):
+			retval["skipped"] += 1
+			continue
+		id = row["id"]
+
+		tweet = {"text": text, "id": id, "timestamp": int(dateutil.parser.parse(row["created_at"]).timestamp())}
+		retval["tweets"].append(tweet)
+		retval["count"] += 1
+		retval["last_id"] = id;
+		
+	return(retval)
+
+#
+# Verify our Twitter credentials
+#
 twitter = twython.Twython(app_key, app_secret, twitter_data["final_oauth_token"], twitter_data["final_oauth_token_secret"])
 
 creds = twitter.verify_credentials()
 rate_limit = twitter.get_lastfunction_header('x-rate-limit-remaining')
-logger.info("Rate limit left: " + rate_limit)
+logger.info("Rate limit left for verifying credentials: " + rate_limit)
 
 screen_name = creds["screen_name"]
 logger.info("My screen name is: " + screen_name)
 
 
+tweets = []
+#num_tweets_left = 500
+num_tweets_left = 100
+#num_tweets_left = 20
+num_tweets_to_fetch = 50
+last_id = False
 
+#
+# Fetch tweets in a loop until we hit our max.
+#
+while True:
+
+	result = getTweets(twitter, num_tweets_to_fetch, last_id = last_id)
+	num_tweets_left -= result["count"]
+	logger.info("Tweets fetched=%d, skipped=%d, last_id=%d" % (result["count"], result["skipped"], result["last_id"]))
+	logger.info("Tweets left to fetch: %d" % num_tweets_left)
+	rate_limit = twitter.get_lastfunction_header('x-rate-limit-remaining')
+	logger.info("Rate limit left: " + rate_limit)
+	last_id = result["last_id"]
+
+	tweets.extend(result["tweets"])
+	# TODO: Store in Tweets table
+
+	if (num_tweets_left <= 0):
+		break
+
+
+#print("TEST TWEETS", tweets)
+print("TEST LEN", len(tweets))
 
 
 
