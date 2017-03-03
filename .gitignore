@@ -1,9 +1,13 @@
 
-*.swp
 
 .Python
 bin/
 include/
-lib/
+lib/python3.5
+__pycache__
 pip-selfcheck.json
+
+*.swp
+
+config.ini
 
