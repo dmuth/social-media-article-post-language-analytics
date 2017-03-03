@@ -54,7 +54,6 @@ class data():
 				value = json.loads(row["value"])
 
 			except Exception as e:
-				print("TEST E", e, row["value"])
 				value = row["value"]
 
 			retval = {
@@ -62,6 +61,11 @@ class data():
 				"key": row["key"],
 				"value": value,
 				}
+
+			retval = value
+			retval["rowid"] = row["rowid"]
+			retval["key"] = row["key"]
+
 			return(retval)
 
 
