@@ -4,17 +4,23 @@
 
 import sqlite3
 
+
 class db():
 
 	conn = ""
 
 	def __init__(self):
-		self.conn = sqlite3.connect('example.db')
+		self.conn = sqlite3.connect('twitter-posts.db')
+
+		# Autocommit
+		self.conn.isolation_level = None
 
 
 	def execute(self, query, args = None):
+
 		if (args):	
 			retval = self.conn.execute(query, args)
+
 		else:
 			retval = self.conn.execute(query)
 
