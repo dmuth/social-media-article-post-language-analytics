@@ -3,6 +3,7 @@
 #
 
 
+import json
 import sqlite3
 
 
@@ -37,10 +38,17 @@ class data():
 
 		for row in results:
 
+			try:
+				value = json.loads(row["value"])
+
+			except Exception as e:
+				print("TEST E", e, row["value"])
+				value = row["value"]
+
 			retval = {
 				"rowid": row["rowid"],
 				"key": row["key"],
-				"value": row["value"],
+				"value": value,
 				}
 			return(retval)
 
@@ -50,6 +58,7 @@ class data():
 	#
 	def put(self, key, value):
 		query = "INSERT OR REPLACE INTO %s (key, value) VALUES (?, ?)" % self.table
+		value = json.dumps(value)
 		self.db.execute(query, (key, value))
 
 
