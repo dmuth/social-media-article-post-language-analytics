@@ -53,7 +53,7 @@ if (not twitter_data):
 	auth = twitter.get_authentication_tokens()
 
 	auth_url = auth["auth_url"]
-	logging.debug("Auth URL: " + auth_url)
+	logger.debug("Auth URL: " + auth_url)
 
 	print("# ")
 	print("# We could not find Twitter credentials, so we'll need to get them.")
@@ -102,10 +102,12 @@ twitter = twython.Twython(app_key, app_secret, twitter_data["final_oauth_token"]
 
 creds = twitter.verify_credentials()
 rate_limit = twitter.get_lastfunction_header('x-rate-limit-remaining')
-logging.info("Rate limit left: " + rate_limit)
+logger.info("Rate limit left: " + rate_limit)
 
 screen_name = creds["screen_name"]
-logging.info("My screen name is: " + screen_name)
+logger.info("My screen name is: " + screen_name)
+
+
 
 
 
