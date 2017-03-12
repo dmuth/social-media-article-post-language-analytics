@@ -185,6 +185,10 @@ num_tweets_to_fetch = 200
 num_tweets_written = 0
 last_id = False
 
+num_passes_zero_tweets = 5
+num_passes_zero_tweets_left = num_passes_zero_tweets
+
+
 #
 # Fetch tweets in a loop until we hit our max.
 #
@@ -192,6 +196,22 @@ while True:
 
 	result = getTweets(twitter, num_tweets_to_fetch, last_id = last_id)
 	num_tweets_left -= result["count"]
+
+	if result["count"] == 0:
+		num_passes_zero_tweets_left -= 1
+		logger.info("We got zero tweets this pass! passes_left=%d (Are we at the end of the timeline?)" % 
+			num_passes_zero_tweets_left)
+		if num_passes_zero_tweets_left == 0:
+			logger.info("Number of zero passes left == 0. Yep, we're at the end of the timeline!")
+			break
+		continue
+
+	#
+	# We got some tweets, reset our zero tweets counter
+	#
+	num_passes_zero_tweets_left = num_passes_zero_tweets
+
+
 	#logger.info("Tweets fetched=%d, skipped=%d, last_id=%d" % (result["count"], result["skipped"], result["last_id"]))
 	logger.info("Tweets fetched=%d, skipped=%d, last_id=%s" % (result["count"], result["skipped"], result.get("last_id", None)))
 	logger.info("Tweets left to fetch: %d" % num_tweets_left)
@@ -211,6 +231,8 @@ while True:
 
 	if (num_tweets_left <= 0):
 		break
+
+	
 
 
 logger.info("Total tweets written: %d" % num_tweets_written)
