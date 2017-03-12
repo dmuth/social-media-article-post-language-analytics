@@ -4,6 +4,8 @@
 # Tokens cab be obtained from https://developers.facebook.com/tools/explorer
 # Creating your own app is recommended, but not strictly necessary.
 #
+# The only privilege you'll need is "user_posts".
+#
 access_token=FIXME
 
 
