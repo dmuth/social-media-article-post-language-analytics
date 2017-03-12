@@ -12,7 +12,7 @@ class data():
 	#
 	# The table we're working with
 	#
-	table = "posts"
+	table = "facebook_posts"
 
 	#
 	# Our database object

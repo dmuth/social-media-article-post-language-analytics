@@ -17,7 +17,7 @@ import dateutil.parser
 sys.path.append("lib")
 import db
 import db.tables.data
-import db.tables.posts
+import db.tables.facebook_posts
 
 #
 # Set up the logger
@@ -34,7 +34,7 @@ config.read("config.ini")
 # Create our data object for writing to the data table.
 #
 sql = db.db()
-data_posts = db.tables.posts.data(sql)
+data_posts = db.tables.facebook_posts.data(sql)
 
 access_token = config["facebook"].get("access_token")
 
