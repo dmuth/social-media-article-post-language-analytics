@@ -1,4 +1,12 @@
 
+[facebook]
+#
+# Tokens cab be obtained from https://developers.facebook.com/tools/explorer
+# Creating your own app is recommended, but not strictly necessary.
+#
+access_token=FIXME
+
+
 [twitter]
 app_key = FIXME
 app_secret = FIXME
