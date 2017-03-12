@@ -15,6 +15,7 @@ import twython
 sys.path.append("lib")
 import db
 import db.tables.data
+import db.tables.tweets
 
 #
 # Set up the logger
@@ -32,6 +33,7 @@ config.read("config.ini")
 #
 sql = db.db()
 data = db.tables.data.data(sql)
+data_tweets = db.tables.tweets.data(sql)
 
 app_key = config["twitter"].get("app_key")
 app_secret = config["twitter"].get("app_secret")
@@ -112,7 +114,9 @@ if (not twitter_data):
 #
 def getTweets(twitter, count, **kwargs):
 
-	retval = {"tweets": [], "count": 0, "skipped": 0, "last_id": -1}
+	#retval = {"tweets": [], "count": 0, "skipped": 0, "last_id": -1}
+	retval = {"tweets": [], "count": 0, "skipped": 0}
+	logger.info("getTweets(): count=%d, last_id=%d" % (count, kwargs["last_id"]))
 	
 	#
 	# If we have a last ID, decrement it by one and query Twitter accordingly,
@@ -131,18 +135,26 @@ def getTweets(twitter, count, **kwargs):
 
 	last_id = None
 
-	#
-	# Now loop through our Tweets, filter out any RTs, do timestamp conversion,
-	# and store the tweet.
-	#
 	for row in tweets:
 		text = row["text"]
+
+		#
+		# Skip RTs
+		#
 		if (text[0] == "R" and text[1] == "T"):
 			retval["skipped"] += 1
 			continue
+
+		if not "http://" in text and not "https://" in text:
+			retval["skipped"] += 1
+			continue
+
 		id = row["id"]
 
-		tweet = {"text": text, "id": id, "timestamp": int(dateutil.parser.parse(row["created_at"]).timestamp())}
+		tweet = {"text": text, "id": id, 
+				"timestamp": int(dateutil.parser.parse(row["created_at"]).timestamp()), 
+				"timestamp_raw": row["created_at"]
+				}
 		retval["tweets"].append(tweet)
 		retval["count"] += 1
 		retval["last_id"] = id;
@@ -163,10 +175,14 @@ logger.info("My screen name is: " + screen_name)
 
 
 tweets = []
+num_tweets_left = 5000
 #num_tweets_left = 500
-num_tweets_left = 100
+#num_tweets_left = 100
 #num_tweets_left = 20
-num_tweets_to_fetch = 50
+num_tweets_to_fetch = 200
+#num_tweets_to_fetch = 100
+#num_tweets_to_fetch = 50
+num_tweets_written = 0
 last_id = False
 
 #
@@ -176,21 +192,28 @@ while True:
 
 	result = getTweets(twitter, num_tweets_to_fetch, last_id = last_id)
 	num_tweets_left -= result["count"]
-	logger.info("Tweets fetched=%d, skipped=%d, last_id=%d" % (result["count"], result["skipped"], result["last_id"]))
+	#logger.info("Tweets fetched=%d, skipped=%d, last_id=%d" % (result["count"], result["skipped"], result["last_id"]))
+	logger.info("Tweets fetched=%d, skipped=%d, last_id=%s" % (result["count"], result["skipped"], result.get("last_id", None)))
 	logger.info("Tweets left to fetch: %d" % num_tweets_left)
 	rate_limit = twitter.get_lastfunction_header('x-rate-limit-remaining')
 	logger.info("Rate limit left: " + rate_limit)
-	last_id = result["last_id"]
+
+	if "last_id" in result:
+		last_id = result["last_id"]
 
 	tweets.extend(result["tweets"])
-	# TODO: Store in Tweets table
+
+	for row in result["tweets"]:
+		tweet_id = row["id"]
+		tweet = row
+		data_tweets.put(tweet_id, tweet)
+		num_tweets_written += 1
 
 	if (num_tweets_left <= 0):
 		break
 
 
-#print("TEST TWEETS", tweets)
-print("TEST LEN", len(tweets))
+logger.info("Total tweets written: %d" % num_tweets_written)
 
 
 
