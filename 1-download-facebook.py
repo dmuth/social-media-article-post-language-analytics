@@ -140,7 +140,7 @@ def getPosts(access_token, limit, **kwargs):
 		post["created_time_raw"] = row["created_time"]
 		post["created_time"] = int(dateutil.parser.parse(row["created_time"]).timestamp())
 		post["id"] = row["id"]
-		if "link" in post:
+		if "link" in row:
 			post["link"] = row["link"]
 
 		retval["posts"].append(post)
