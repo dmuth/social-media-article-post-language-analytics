@@ -74,6 +74,9 @@ def extractFromFacebookPosts(sql, urls_table, pattern):
 		data = json.loads(value)
 		text = data["message"]
 
+		if "link" in data:
+			text += " " + data["link"]
+
 		words = text.split(" ")
 		for word in words:
 			result = pattern.match(word)
