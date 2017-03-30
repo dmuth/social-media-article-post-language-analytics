@@ -1,15 +1,12 @@
 
 
-.Python
-bin/
-include/
-lib/python3.5
-__pycache__
-pip-selfcheck.json
 
 *.swp
 
 config.ini
 
 twitter-posts.db
+
+virtualenv*
+__pycache__
 
