@@ -5,7 +5,7 @@
 
 config.ini
 
-twitter-posts.db
+posts.db
 
 virtualenv*
 __pycache__
