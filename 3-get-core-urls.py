@@ -86,9 +86,14 @@ def fetchUrlsDownload(urls, urls_data):
 			first_url = result.url
 			final_url = result.url
 			code = result.status_code
-			content_type = result.headers["content-type"]
 			content = ""
+			content_type = ""
 
+			#
+			# Some webservers don't return content-type.  That's a new one on me!
+			#
+			if "content-type" in result.headers:
+				content_type = result.headers["content-type"]
 
 			#
 			# If this is a photo posted on Twitter, flag it so we don't store the content
@@ -103,8 +108,14 @@ def fetchUrlsDownload(urls, urls_data):
 			# If we got an HTTP 2xx (success) and the result type was text,
 			# copy the result content over to the content variable.
 			#
-			if str(code)[0] == "2" and re.search("^text/", content_type):
-				content = result.text
+			if str(code)[0] == "2":
+				if content_type:
+					if re.search("^text/", content_type):
+						content = result.text
+
+				else:
+					content = result.text
+
 
 			urls_data.put(first_url, final_url, code, content_type, content)
 			logger.info("Stored %d bytes for URL '%s' (code=%d, content-type=%s)" 
@@ -152,10 +163,13 @@ def fetchUrls(cursor, urls_data, **kwargs):
 	fetchUrlsDownload(urls_to_fetch, urls_data)
 
 
+
 #url_results = getUrlCursor(limit = 10) # Debugging
-url_results = getUrlCursor(limit = 100)
+#url_results = getUrlCursor(limit = 100) # Debugging
+url_results = getUrlCursor(limit = 200)
 #fetchUrls(url_results, urls_data, max_queue_size = 5)
-fetchUrls(url_results, urls_data, max_queue_size = 10)
+#fetchUrls(url_results, urls_data, max_queue_size = 10)
+fetchUrls(url_results, urls_data, max_queue_size = 50)
 
 
 
