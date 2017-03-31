@@ -10,6 +10,7 @@ import logging as logger
 import logging.config
 import re
 import requests
+import requests.models
 import sqlite3
 import sys
 import time
@@ -113,13 +114,24 @@ def fetchUrlsDownload(urls, urls_data):
 					if re.search("^text/", content_type):
 						content = result.text
 
+					else:
+						logger.warn("Ignoring URL with content type '%s'" % content_type)
+						urls_data.put(first_url, final_url, code, content_type, content)
+
 				else:
 					content = result.text
+
+			else:
+				logger.warn("Ignoring URL with status code '%d'" % code)
+				urls_data.put(first_url, final_url, code, content_type, content)
 
 
 			urls_data.put(first_url, final_url, code, content_type, content)
 			logger.info("Stored %d bytes for URL '%s' (code=%d, content-type=%s)" 
 				% (len(content), final_url, code, content_type))
+
+		else:
+			logger.warn("Got no result, so there isn't much we can do here...")
 
 
 #
@@ -144,7 +156,20 @@ def fetchUrls(cursor, urls_data, **kwargs):
 		#first_url = "http://localhost" # Debugging
 		#first_url = "http://google.com" # Debugging
 		#first_url = "http://twitter.com" # Debugging
-		if (urls_data.get(first_url)):
+
+		#
+		# I learned the hard way that a URL with unicode in it is converted 
+		# into percent-encoded text by requests, which means that the URL 
+		# eventually written to the table doesn't byte-for-byte match the 
+		# original URL.  I ended up doing a code dive into the requests source 
+		# and found the function which converts that URL.  So I'm going to call 
+		# it here so that the URL I check for in the database is the same as 
+		# what would eventually get written.
+		#
+		p = requests.models.PreparedRequest()
+		p.prepare(url = first_url)
+
+		if (urls_data.get(p.url)):
 			continue
 
 		logger.info("Adding URL '%s' to fetch queue" % first_url)
