@@ -99,6 +99,20 @@ def keepPost(post):
 
 
 #
+# Test out our access token
+#
+def testToken(access_token):
+
+	url = ("https://graph.facebook.com/me?access_token=" + access_token)
+	r = requests.get(url)
+	logger.info("Status Code from Facebook: " + str(r.status_code))
+
+	if r.status_code != 200:
+		raise Exception("Invalid access token.  Please go to https://developers.facebook.com/tools/explorer to download one")
+
+
+
+#
 # Retrieve some posts from Facebooke.
 # 
 # @param string access_token The access token
@@ -122,6 +136,9 @@ def getPosts(access_token, limit, **kwargs):
 	r = requests.get(url)
 
 	logger.info("Status Code from Facebook: " + str(r.status_code))
+	if r.status_code != 200:
+		raise Exception("Invalid access token.  Please go to https://developers.facebook.com/tools/explorer "
+			+ "to download one. Make sure that you have sufficient permission to view wall posts.")
 
 	for row in r.json()["data"]:
 
@@ -172,6 +189,9 @@ def getSkippedText(stats):
 num_posts_left = 10000
 limit = 200
 stats = {"num_posts_written": 0, "skipped": {}}
+
+
+testToken(access_token)
 
 next = ""
 
