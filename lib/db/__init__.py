@@ -30,6 +30,9 @@ class db():
 	#
 	# Wrapper to create a table if it does not exist
 	#
+	# @param string table The name of the table to create
+	# @param string settings A string with the schema for the table.
+	#
 	def createTable(self, table, settings):
 
 		#
