@@ -77,7 +77,12 @@ def fetchUrlsDownload(urls, urls_data):
 	# TODO: For now, the URL is of my website.  When this code goes public, I'll fix that.
 	#
 	headers = {"user-agent": "Mozilla/5.0 (compatible; http://www.dmuth.org/)"}
-	rs = (grequests.get(u, timeout = timeout, headers = headers) for u in urls)
+
+	first_urls = []
+	for url in urls:
+		first_urls.append(url["first_url"])
+
+	rs = (grequests.get(u, timeout = timeout, headers = headers) for u in first_urls)
 
 	results = grequests.map(rs, size=10, exception_handler = exceptionHandler)
 
@@ -133,6 +138,16 @@ def fetchUrlsDownload(urls, urls_data):
 		else:
 			logger.warn("Got no result, so there isn't much we can do here...")
 
+	#
+	# Now go through our URLs and verify that they were downloaded.  If not, then
+	# write that to the urls_data table.
+	#
+	for url in urls:
+		escaped_url = url["escaped_url"]
+		if (not urls_data.get(escaped_url)):
+			logger.warn("We did not find anything for %s (%s)" % (url["first_url"], escaped_url))
+			urls_data.put(escaped_url, "", "", "timed out? not found?", "")
+
 
 #
 # Loop through our list of URLs to fetch and fetch them
@@ -173,7 +188,7 @@ def fetchUrls(cursor, urls_data, **kwargs):
 			continue
 
 		logger.info("Adding URL '%s' to fetch queue" % first_url)
-		urls_to_fetch.append(first_url)
+		urls_to_fetch.append({"first_url": first_url, "escaped_url": p.url})
 
 		#
 		# If we have enough URLs in our batch, download them.
@@ -188,13 +203,14 @@ def fetchUrls(cursor, urls_data, **kwargs):
 	fetchUrlsDownload(urls_to_fetch, urls_data)
 
 
-
 #url_results = getUrlCursor(limit = 10) # Debugging
 #url_results = getUrlCursor(limit = 100) # Debugging
-url_results = getUrlCursor(limit = 200)
+#url_results = getUrlCursor(limit = 200)
+#url_results = getUrlCursor(limit = 1000)
+url_results = getUrlCursor()
 #fetchUrls(url_results, urls_data, max_queue_size = 5)
 #fetchUrls(url_results, urls_data, max_queue_size = 10)
-fetchUrls(url_results, urls_data, max_queue_size = 50)
+fetchUrls(url_results, urls_data, max_queue_size = 100)
 
 
 
