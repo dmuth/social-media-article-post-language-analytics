@@ -27,16 +27,8 @@ class data():
 		#
 		self.db.conn.row_factory = sqlite3.Row
 
-		#
-		# If the table is found, stop.  Otherwise, create it.
-		#
-		query = "SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % self.table
-		results = self.db.execute(query)
-		for row in results:
-			return(None)
-
-		query = "CREATE TABLE %s (tweet_id INTEGER UNIQUE NOT NULL, value TEXT NOT NULL)" % self.table
-		self.db.execute(query)
+		schema = "tweet_id INTEGER UNIQUE NOT NULL, value TEXT NOT NULL"
+		self.db.createTable(self.table, schema)
 
 
 

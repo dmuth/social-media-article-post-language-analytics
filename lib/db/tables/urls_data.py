@@ -27,15 +27,7 @@ class data():
 		#
 		self.db.conn.row_factory = sqlite3.Row
 
-		#
-		# If the table is found, stop.  Otherwise, create it.
-		#
-		query = "SELECT name FROM sqlite_master WHERE type='table' AND name='%s'" % self.table
-		results = self.db.execute(query)
-		for row in results:
-			return(None)
-
-		query = ("CREATE TABLE %s (" % self.table
+		schema = (""
 			#
 			# The URL that was retrieved from Facebook or Twitter.  This is very likely a shortener.
 			#
@@ -55,10 +47,9 @@ class data():
 			#
 			# The content of the response.
 			#
-			+ "content BLOB DEFAULT '' NOT NULL)" )
+			+ "content BLOB DEFAULT '' NOT NULL" )
 
-		self.db.execute(query)
-
+		self.db.createTable(self.table, schema)
 
 	#
 	# Fetch a row from the table with the specified first_url value.
