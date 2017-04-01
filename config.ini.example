@@ -10,6 +10,13 @@ access_token=FIXME
 
 
 [twitter]
+#
+# You'll need to go to https://apps.twitter.com/, create a new app, and put
+# the app key and secret here.
+#
+# Note that there will be an additional step beyond that to authenticate to Twitter,
+# but that will be done in the actual Twitter download script itself.
+#
 app_key = FIXME
 app_secret = FIXME
 
