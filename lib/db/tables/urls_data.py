@@ -37,7 +37,7 @@ class data():
 
 		query = ("CREATE TABLE %s (" % self.table
 			#
-			# The URL that was retrieved from Facebook or Twitter.  This is very likely a shortener
+			# The URL that was retrieved from Facebook or Twitter.  This is very likely a shortener.
 			#
 			+ "first_url VARCHAR(255) UNIQUE NOT NULL, "
 			#
@@ -53,9 +53,9 @@ class data():
 			#
 			+ "content_type VARCHAR(64) DEFAULT '' NOT NULL, "
 			#
-			# The content of the response
+			# The content of the response.
 			#
-			+ "content TEXT DEFAULT '' NOT NULL)" )
+			+ "content BLOB DEFAULT '' NOT NULL)" )
 
 		self.db.execute(query)
 
