@@ -1,5 +1,5 @@
 #
-# This module is used for wrapping access to the "twitter" table.
+# This module is used for wrapping access to the "urls_text" table.
 #
 
 
@@ -42,6 +42,7 @@ class data():
 			+ "value BLOB DEFAULT '' NOT NULL" )
 
 		self.db.createTable(self.table, schema)
+
 
 	#
 	# Fetch a row from the table with the specified first_url value.
