@@ -13,6 +13,7 @@ down a rabiit hole wherein I got back up to speed on Python, taught myself a few
 <a href="https://twython.readthedocs.io/en/latest/">Twython</a> (Twitter API integration), 
 <a href="http://docs.python-requests.org/en/master/">Requests</a> (for talking to Facebook),
 <a href="https://docs.python.org/3/library/argparse.html">Argparse</a> (a fantastic document parser),
+<a href="https://www.crummy.com/software/BeautifulSoup/">Beautiful Soup</a> (HTML parsing),
 and <a href="https://www.sqlite.org/">SQLite</a> (for data storage).
 
 
@@ -89,13 +90,41 @@ A successful run produces results like these:
 
 ### 2-extract-urls.py
 
+This script goes through all of the saved Tweets and Facebook posts, extracts the URL(s)
+present in each post, and writes them out to the the `urls` table.  Since we are making 
+use of `INSERT OR REPLACE INTO`, if the same URL is posted to both Twitter and Facebook
+(URL shorteners not withstanding), only one row will wind up in the table so as to
+avoid duplicated.
 
 
 ### 3-get-core-urls.py
 
+This script goes through the process of downloading the contents of each URL 
+(if it hasn't already been downloaded) and storing the results in the `urls_data` table.
+Once the URL is downloaded, the "final" de-shortened URL is noted as well, and the
+original URL, the final URL, and the contents are written to `urls_data`.
+
+This script is by **far** the most network-intensive part of this project.
+
+By default, 100 URLs are downloaded with a 10 second timeout.  Then there is sanity checking
+which catches things like Twitter photos (which can't be caught by the Content-Type header)
+and non-2XX responses.  All results (including non-2XX) are written to the table, to ensure
+that we don't repeatedly try to call 404 pages, images, etc.
+
+
 ### 4-extract-text.py
 
+This script goes through `urls_data`, pulls the text of every URL that was crawled,
+parses the HTML, and then writes it to the `urls_text` table.
+
+There are a few key tags that we pay attention to, namely the title, and any h1, h2, and h3 tags.
+The body is also grabbed, but only the first 10K (so as to keep things to a reasonable size).
+
+
 ### 5-analyze-text.py
+
+
+
 
 
 ## A bit about database design
@@ -113,6 +142,14 @@ no schema changes were made.
 
 I'm not sure I would totally advocate this approach for an actual production system, at
 least not without extensive testing (which is what Wix appears to have done).
+
+
+## TODO / Room For Improvement
+
+I only got up to speed on the argparse module towards the end of this project.  I should
+really add support for argument parsing into the scripts that download social media posts
+and the contents of the URLs in them.  That would make future development a little easier
+in that I could limit a run to just 5 posts, rather than having to tweak code to do that.
 
 
 ## Troubleshooting
