@@ -124,6 +124,19 @@ The body is also grabbed, but only the first 10K (so as to keep things to a reas
 ### 5-analyze-text.py
 
 
+Finally, the text analysis part!  This is the whole reason why I wrote this project, and why
+I wanted to play around with the <a href="http://www.nltk.org/">Natural Language ToolKit</a>.
+
+Running this script with `-h` will give you a list of options, but in summary, the following 
+operations can be performed against all content stored in the `urls_text` table:
+
+- Get a list of unusual words in the titles
+- Get a list of unusual words in the post bodies
+- Display words occuring in post bodies more than a certain number of times
+- Perform stemming on all words before any of the above operations
+
+When the script is complete, totals will be printed for unusual words or frequent words 
+(if either/both were searched for).
 
 
 
