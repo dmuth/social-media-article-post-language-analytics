@@ -30,6 +30,7 @@ import db.tables.urls_text
 
 parser = argparse.ArgumentParser(description = "Analyze crawled text")
 parser.add_argument("-l", "--limit", type = int, help = "Only process a certain number of URLs", default = 5)
+parser.add_argument("-q", "--quiet", action = "store_true", help = "Quiet mode. If specified, don't print out unusual/frequent words for each post, just the totals at the end")
 parser.add_argument("-s", "--stem", action = "store_true", help = "Use stemming on words FIRST, before doing anything else")
 parser.add_argument("-ut", "--unusual-words-title", action = "store_true", help = "Display unusual words found in title")
 parser.add_argument("-ub", "--unusual-words-body", action = "store_true", help = "Display unusual words found in body")
@@ -161,7 +162,8 @@ for row in rows:
 				totals["frequent_words"][word] = 0
 			totals["frequent_words"][word] += freq[word]
 
-		print("Frequent words in body (more than %d times): %s" % (args.frequent_words, freq))
+		if not args.quiet:
+			print("Frequent words in body (more than %d times): %s" % (args.frequent_words, freq))
 
 
 	if args.unusual_words_title:
@@ -172,7 +174,8 @@ for row in rows:
 				totals["unusual_words_title"][word] = 0
 			totals["unusual_words_title"][word] += 1
 
-		print("Unusual wods in title: %s" % (words))
+		if not args.quiet:
+			print("Unusual wods in title: %s" % (words))
 
 
 	if args.unusual_words_body:
@@ -183,11 +186,10 @@ for row in rows:
 				totals["unusual_words_body"][word] = 0
 			totals["unusual_words_body"][word] += 1
 
-		print("Unusual wods in body: %s" % (words))
+		if not args.quiet:
+			print("Unusual wods in body: %s" % (words))
 
-	print("")
-
-
+print("")
 print("Totals:", totals)
 
 
