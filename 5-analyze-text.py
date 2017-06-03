@@ -29,11 +29,11 @@ import db.tables.urls_text
 
 
 parser = argparse.ArgumentParser(description = "Analyze crawled text")
-parser.add_argument("-l", "--limit", type = int, help = "Only process a certain number of URLs")
+parser.add_argument("-l", "--limit", type = int, help = "Only process a certain number of URLs", default = 5)
+parser.add_argument("-s", "--stem", action = "store_true", help = "Use stemming on words FIRST, before doing anything else")
 parser.add_argument("-ut", "--unusual-words-title", action = "store_true", help = "Display unusual words found in title")
 parser.add_argument("-ub", "--unusual-words-body", action = "store_true", help = "Display unusual words found in body")
 parser.add_argument("-fw", "--frequent-words", type = int, metavar = "N", help = "Display words occuring more then N times in body")
-parser.add_argument("-s", "--stem", action = "store_true", help = "Use stemming on unusual and frequent words")
 
 
 args = parser.parse_args()
@@ -91,14 +91,11 @@ def nltkDownload():
 #
 # Extract unusual words from text. 
 #
-def unusualWords(text, stem):
+def unusualWords(text):
 
 	text_vocab = set(w.lower() for w in text if w.isalpha() and len(w) <= 15)
 	english_vocab = set(w.lower() for w in nltk.corpus.words.words())
 	retval = text_vocab - english_vocab
-
-	if stem:
-		retval = [stemmer.stem(plural) for plural in retval]
 
 	return (sorted(retval))
 
@@ -107,16 +104,18 @@ def unusualWords(text, stem):
 # Return a list of our frequent words exceeding num. 
 # We enforce a minimum of 7 character to avoid small words and get more proper nouns
 #
-def frequentWords(text, min, stem):
+def frequentWords(text, min):
+
+	retval = {}
 
 	fdist = nltk.FreqDist(words_text)
 
-	retval = (list(w for w in set(words_text) if fdist[w] > min and len(w) >= 7))
+	for word in fdist:
+		if len(word) > 7:
+			if fdist[word] > min:
+				retval[word] = fdist[word]
 
-	if stem:
-		retval = sorted([stemmer.stem(plural) for plural in retval])
-
-	return(sorted(retval))
+	return(retval)
 
 
 nltkDownload()
@@ -124,6 +123,11 @@ rows = getUrlsTextCursor(limit = args.limit)
 
 if args.stem:
 	stemmer = PorterStemmer()
+
+totals = {}
+totals["frequent_words"] = {}
+totals["unusual_words_title"] = {}
+totals["unusual_words_body"] = {}
 
 for row in rows:
 
@@ -137,35 +141,53 @@ for row in rows:
 	title = title.replace("\n", "")
 	title = title.replace("\r", "")
 
-	print("Title: %s" % title[0:120])
+	print("Processing post: %s" % title[0:120])
 	words_title = list(w.lower() for w in nltk.word_tokenize(title))
 	words_text = list(w.lower() for w in nltk.word_tokenize(data["text"]))
 
+	#
+	# Are we stemming the words from the body?
+	#
+	if args.stem:
+		words_title = [stemmer.stem(plural) for plural in words_title]
+		words_text = [stemmer.stem(plural) for plural in words_text]
+
 	if args.frequent_words:
-		print("Frequent words in body (more than %d times): %s" % (args.frequent_words, 
-			frequentWords(words_text, args.frequent_words, args.stem)))
+
+		freq = frequentWords(words_text, args.frequent_words)
+
+		for word in freq:
+			if not word in totals["frequent_words"]:
+				totals["frequent_words"][word] = 0
+			totals["frequent_words"][word] += freq[word]
+
+		print("Frequent words in body (more than %d times): %s" % (args.frequent_words, freq))
+
 
 	if args.unusual_words_title:
-		print("Unusual wods in title: %s" % (unusualWords(words_title, args.stem)))
+		words = unusualWords(words_title)
+
+		for word in words:
+			if not word in totals["unusual_words_title"]:
+				totals["unusual_words_title"][word] = 0
+			totals["unusual_words_title"][word] += 1
+
+		print("Unusual wods in title: %s" % (words))
+
 
 	if args.unusual_words_body:
-		print("Unusual wods in body: %s" % (unusualWords(words_text, args.stem)))
+		words = unusualWords(words_text)
+
+		for word in words:
+			if not word in totals["unusual_words_body"]:
+				totals["unusual_words_body"][word] = 0
+			totals["unusual_words_body"][word] += 1
+
+		print("Unusual wods in body: %s" % (words))
 
 	print("")
 
 
-print(args) # Debugging
-
-#
-# TODO:
-#
-# Create a function for each of these and arguments to try each:
-#
-# - Look for colocations: http://www.nltk.org/howto/collocations.html
-#	- I should do this for the body
-#
-# - For each mode (ut, ub, fw) keep running totals in a dictions and print up stats at end
-#
-
+print("Totals:", totals)
 
 
