@@ -35,6 +35,7 @@ parser.add_argument("-s", "--stem", action = "store_true", help = "Use stemming 
 parser.add_argument("-ut", "--unusual-words-title", action = "store_true", help = "Display unusual words found in title")
 parser.add_argument("-ub", "--unusual-words-body", action = "store_true", help = "Display unusual words found in body")
 parser.add_argument("-fw", "--frequent-words", type = int, metavar = "N", help = "Display words occuring more then N times in body")
+parser.add_argument("-t", "--top", type = int, metavar ="N", help = "The number of top unusual/infrequent/etc. words to display in the totals at the end of the script.", default = 10)
 
 
 args = parser.parse_args()
@@ -94,7 +95,7 @@ def nltkDownload():
 #
 def unusualWords(text):
 
-	text_vocab = set(w.lower() for w in text if w.isalpha() and len(w) <= 15)
+	text_vocab = set(w.lower() for w in text if w.isalpha() and len(w) >= 5 and len(w) <= 15)
 	english_vocab = set(w.lower() for w in nltk.corpus.words.words())
 	retval = text_vocab - english_vocab
 
@@ -109,7 +110,7 @@ def frequentWords(text, min):
 
 	retval = {}
 
-	fdist = nltk.FreqDist(words_text)
+	fdist = nltk.FreqDist(text)
 
 	for word in fdist:
 		if len(word) > 7:
@@ -130,9 +131,11 @@ totals["frequent_words"] = {}
 totals["unusual_words_title"] = {}
 totals["unusual_words_body"] = {}
 
-for row in rows:
 
-	data = json.loads(row["value"])
+#
+# Process a row, pulling out frequent words, unusual words, etc.
+#
+def processRow(data):
 
 	title = (" ".join(data.get("title", "")) 
 		+ " " + " ".join(data.get("h1", ""))
@@ -189,7 +192,101 @@ for row in rows:
 		if not args.quiet:
 			print("Unusual wods in body: %s" % (words))
 
+
+#
+# Process our rows.
+#
+def processRows():
+
+	for row in rows:
+
+		data = json.loads(row["value"])
+		processRow(data)
+
+
+#
+# Group our unusual words by the number of times used
+#
+def getUnusualWordsTotals(totals):
+
+	#
+	# The key is the number of occurrences and the value is a list of words.
+	#
+	stats = {}
+
+	for word, count in totals.items():
+
+		if not count in stats:
+			stats[count] = []
+
+		stats[count].append(word)
+
+	return(stats)
+
+
+#
+# Print up our unused words totals.
+#
+def printUnusedWordsTotals(stats, num):
+
+	#
+	# Now get our keys (counts), reverse them, and start printing the most
+	# common words here.  Note that we're checking how many words are left to
+	# print not with each word, but with each count.  I feel that printing a 
+	# complete list of words for each count is more important than printing
+	# the exact number of words requested.
+	#
+	left = num
+	keys = list(reversed(sorted(stats.keys())))
+
+	for k in keys:
+
+		words = stats[k]
+
+		for word in words:
+			left -= 1
+
+		print("Unusual words that showed up %d times: %s" % (k, ", ".join(words)))
+		#print(words) # Debugging
+
+		if left <= 0:
+			break
+
+
+#
+# Print up our totals when we're done
+#
+def printTotals(totals):
+
+	#print("Totals:", totals) # Debugging
+
+	if args.unusual_words_body:
+		stats = getUnusualWordsTotals(totals["unusual_words_body"])
+		print("Top unusual words that were found in post bodies:")
+		printUnusedWordsTotals(stats, args.top)
+		print("")
+
+	if args.unusual_words_title:
+		stats = getUnusualWordsTotals(totals["unusual_words_title"])
+		print("Top unusual words that were found in post titles:")
+		printUnusedWordsTotals(stats, args.top)
+		print("")
+
+	if args.frequent_words:
+		#
+		# It turns out that because the data structures between unusual words
+		# and frequent words are basically the same, we can reuse these functions!
+		#
+		stats = getUnusualWordsTotals(totals["frequent_words"])
+		print("Top frequent words that were found in post bodies:")
+		printUnusedWordsTotals(stats, args.top)
+
+
+processRows()
 print("")
-print("Totals:", totals)
+printTotals(totals)
+
+
+
 
 
