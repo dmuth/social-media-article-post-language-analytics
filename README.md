@@ -240,6 +240,14 @@ really add support for argument parsing into the scripts that download social me
 and the contents of the URLs in them.  That would make future development a little easier
 in that I could limit a run to just 5 posts, rather than having to tweak code to do that.
 
+The other thing that sticks in the back of my heads is that for some sites as the
+more mainstream news sites, downloading the contents of the page doesn't just give me the
+article content, but all of the stuff that's in the sidebar, related article, etc.  I suspect
+that is throwing off my analysis, and likely explains all of the times that the word "facebook"
+pops up.  I'm not sure what the "fix" is other than to write a parser that is unique to each
+of those sites.  And I honestly wouldn't be surprise if Google has done something like this
+in order to improve its search results.
+
 
 ## Troubleshooting
 
