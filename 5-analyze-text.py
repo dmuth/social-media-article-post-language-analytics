@@ -120,9 +120,6 @@ def frequentWords(text, min):
 	return(retval)
 
 
-nltkDownload()
-rows = getUrlsTextCursor(limit = args.limit)
-
 if args.stem:
 	stemmer = PorterStemmer()
 
@@ -200,6 +197,9 @@ def processRow(data):
 # Process our rows.
 #
 def processRows():
+
+	nltkDownload()
+	rows = getUrlsTextCursor(limit = args.limit)
 
 	for row in rows:
 
