@@ -127,6 +127,7 @@ if args.stem:
 	stemmer = PorterStemmer()
 
 totals = {}
+totals["posts"] = 0
 totals["frequent_words"] = {}
 totals["unusual_words_title"] = {}
 totals["unusual_words_body"] = {}
@@ -191,6 +192,8 @@ def processRow(data):
 
 		if not args.quiet:
 			print("Unusual wods in body: %s" % (words))
+
+	totals["posts"] += 1
 
 
 #
@@ -259,16 +262,20 @@ def printUnusedWordsTotals(stats, num):
 def printTotals(totals):
 
 	#print("Totals:", totals) # Debugging
+	print("Number of posts processed: %d" % (totals["posts"]))
+	print("")
 
 	if args.unusual_words_body:
 		stats = getUnusualWordsTotals(totals["unusual_words_body"])
 		print("Top unusual words that were found in post bodies:")
+		print("")
 		printUnusedWordsTotals(stats, args.top)
 		print("")
 
 	if args.unusual_words_title:
 		stats = getUnusualWordsTotals(totals["unusual_words_title"])
 		print("Top unusual words that were found in post titles:")
+		print("")
 		printUnusedWordsTotals(stats, args.top)
 		print("")
 
@@ -279,6 +286,7 @@ def printTotals(totals):
 		#
 		stats = getUnusualWordsTotals(totals["frequent_words"])
 		print("Top frequent words that were found in post bodies:")
+		print("")
 		printUnusedWordsTotals(stats, args.top)
 
 
