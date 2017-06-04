@@ -263,3 +263,18 @@ Activate that virtualenv, and that should use the copy of Python in Homebrew
 along with its copy of OpenSSL.  Check again, and you'll be at least version 1.0.2
 of OpenSSL as of this writing.
 
+
+## Final Thoughts
+
+Even though the end product didn't turn out as awesome as I hoped it would, I still learned
+a lot about Nautral Language Processing and the substantial amount of work that goes into it.
+It gives me a greater appreaciation for what happens "behind the scenes" with Google queries
+as well as Siri.
+
+I don't see myself doing much more work on this particular project, as NLP is definately 
+not my paritcular brand of vodka, but I figured I'd share the code just so others can take
+a look at it and maybe find it useful.
+
+
+
+
