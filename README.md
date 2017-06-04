@@ -165,6 +165,55 @@ operations can be performed against all content stored in the `urls_text` table:
 When the script is complete, totals will be printed for unusual words or frequent words 
 (if either/both were searched for).
 
+A successful run will display output similar to this:
+```
+
+Number of posts processed: 1775
+
+Top unusual words that were found in post bodies:
+
+Unusual words that showed up 583 times: years
+Unusual words that showed up 566 times: terms
+Unusual words that showed up 561 times: facebook
+Unusual words that showed up 530 times: things
+Unusual words that showed up 483 times: using
+Unusual words that showed up 426 times: email
+Unusual words that showed up 365 times: features
+Unusual words that showed up 360 times: called
+Unusual words that showed up 350 times: states
+Unusual words that showed up 332 times: makes
+Unusual words that showed up 330 times: developers, comments
+
+Top unusual words that were found in post titles:
+
+Unusual words that showed up 176 times: youtube
+Unusual words that showed up 160 times: comments
+Unusual words that showed up 123 times: posts
+Unusual words that showed up 98 times: stories
+Unusual words that showed up 97 times: facebook
+Unusual words that showed up 85 times: online
+Unusual words that showed up 81 times: categories
+Unusual words that showed up 77 times: things
+Unusual words that showed up 69 times: viewing
+Unusual words that showed up 67 times: email
+
+Top frequent words that were found in post bodies:
+
+Unusual words that showed up 259 times: featured
+Unusual words that showed up 145 times: password
+Unusual words that showed up 110 times: facebook
+Unusual words that showed up 98 times: mcdonald’s
+Unusual words that showed up 89 times: bloomberg
+Unusual words that showed up 86 times: hydraulic
+Unusual words that showed up 78 times: pinterest
+Unusual words that showed up 76 times: toothpaste, comments, dynamite
+Unusual words that showed up 73 times: undertale, javascript
+```
+
+Looking at the unusual words above, it's apparent that I like to post links to
+articles which mention Facebook, along with article about developers, and
+YouTube videos.  Looking at the frequent words, I apparently link to Bloomberg a lot
+and like to talk about <a href="http://undertale.com/">Undertale</a> and Javascript.
 
 
 ## A bit about database design
