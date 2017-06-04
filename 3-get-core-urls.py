@@ -220,6 +220,31 @@ def fetchUrls(cursor, urls_data, **kwargs):
 	fetchUrlsDownload(urls_to_fetch, urls_data)
 
 
+#
+# Print up our stats for URLs
+#
+def printUrlStats():
+
+	query = ("SELECT count(*) AS count, content_type, code "
+		+ "FROM urls_data GROUP BY content_type, code "
+		+ "ORDER BY content_type, code")
+
+	rows = sql.execute(query)
+
+	print("Results:")
+	print("")
+	print("%40s\t%3s\t%5s" % ("Content-Type", "Code", "Count"))
+	print("%40s\t%3s\t%5s" % ("============", "====", "====="))
+
+	for row in rows:
+
+		content_type = row["content_type"]
+		if content_type == "":
+			content_type = "(blank)"
+
+		print("%40s\t%4s\t%5s" % (content_type, row["code"], row["count"]))
+
+
 #url_results = getUrlCursor(limit = 10) # Debugging
 #url_results = getUrlCursor(limit = 100) # Debugging
 #url_results = getUrlCursor(limit = 200)
@@ -229,6 +254,6 @@ url_results = getUrlCursor()
 #fetchUrls(url_results, urls_data, max_queue_size = 10)
 fetchUrls(url_results, urls_data, max_queue_size = 100)
 
-
+printUrlStats()
 
 
