@@ -74,9 +74,7 @@ def fetchUrlsDownload(urls, urls_data):
 	#
 	# Setting this to "Mozilla/5.0" as per http://webmasters.stackexchange.com/questions/6205/what-user-agent-should-i-set
 	# 
-	# TODO: For now, the URL is of my website.  When this code goes public, I'll fix that.
-	#
-	headers = {"user-agent": "Mozilla/5.0 (compatible; http://www.dmuth.org/)"}
+	headers = {"user-agent": "Mozilla/5.0 (compatible; https://github.com/dmuth/social-media-article-post-language-analytics)"}
 
 	first_urls = []
 	for url in urls:
