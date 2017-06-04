@@ -102,14 +102,31 @@ def fetchUrlsDownload(urls, urls_data):
 				content_type = result.headers["content-type"]
 
 			#
+			# If we had redirects, go grab what the first URL was.
+			# This is a bit stupid doing it this way, but I couldn't find an easy
+			# way to store it when making the requests.
+			#
+			if result.history:
+				first_url = result.history[0].url
+	
+			#
 			# If this is a photo posted on Twitter, flag it so we don't store the content
 			#
 			if re.search("//twitter.com.*/status/.*/photo/", final_url):
 				content_type = "local/twitter-image"
 
-			if result.history:
-				first_url = result.history[0].url
-	
+			elif re.search("twitter.com/", final_url):
+				#
+				# Filter out any URL that is a link to another Twitter post
+				#
+				content_type = "local/twitter"
+
+			elif re.search("facebook.com/", final_url):
+				#
+				# Filter out any URL that is a link to another Facebook post
+				#
+				content_type = "local/facebook"
+
 			#
 			# If we got an HTTP 2xx (success) and the result type was text,
 			# copy the result content over to the content variable.
