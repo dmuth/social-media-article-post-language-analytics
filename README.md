@@ -111,6 +111,33 @@ which catches things like Twitter photos (which can't be caught by the Content-T
 and non-2XX responses.  All results (including non-2XX) are written to the table, to ensure
 that we don't repeatedly try to call 404 pages, images, etc.
 
+Sanity checking will also be applied to filter out Twitter images, links to other Twitter posts, 
+and links to Facebook posts.
+
+A successful run will print results at the end in a table similar to this:
+
+```
+                            Content-Type	Code	Count
+                            ============	====	=====
+                                 (blank)	 200	    2
+                         application/pdf	 200	    1
+                               image/gif	 200	    8
+                              image/jpeg	 200	   52
+                          local/facebook	 200	   13
+                           local/twitter	 200	  195
+                     local/twitter-image	 200	  574
+                               text/html	 200	  227
+                text/html; charset=utf-8	 200	  936
+                text/html;;charset=UTF-8	 200	   14
+                 text/html;charset=UTF-8	 200	   87
+                              text/plain	 200	    2
+                   timed out? not found?	    	  129
+                              video/webm	 200	    1
+```
+
+Anything that starts with `local/` isn't an actual Content-Type, just a way for my script
+to note that we did not crawl that URL for some reason.
+
 
 ### 4-extract-text.py
 
